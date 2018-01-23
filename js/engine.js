@@ -16,7 +16,9 @@ var Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
-        lastTime;
+        lastTime,
+        level,
+        lives;
 
     canvas.width = 505;
     canvas.height = 606;
@@ -68,24 +70,80 @@ var Engine = (function(global) {
     function update(dt) {
         updateEntities(dt);
         checkCollisions();
+        checkPoints();
+        checkLives();
+        checkStar();
     }
 
     //This function checks if the player and an enemy collide on the same block
     function checkCollisions() {
         allEnemies.forEach(function(enemy) {
+            if (player.starred === false){
             //checking if the enemy and the player are in the same row
-            if (enemy.y === player.y){
-                //checking if the enemy and the player are in the same block
-                if (((enemy.x > -50) && (enemy.x <= 50) && (player.x === 0))||
-                    ((enemy.x > 50) && (enemy.x <= 150) && (player.x === 100))||
-                    ((enemy.x > 150) && (enemy.x <= 250) && (player.x === 200))||
-                    ((enemy.x > 250) && (enemy.x <= 350) && (player.x === 300))||
-                    ((enemy.x > 350) && (enemy.x <= 450) && (player.x === 400))){
-                    player.x = 200;
-                    player.y = 400;
+                if (enemy.y === player.y){
+                    //checking if the enemy and the player are in the same block
+                    if (((enemy.x > -50) && (enemy.x <= 50) && (player.x === 0))||
+                        ((enemy.x > 50) && (enemy.x <= 150) && (player.x === 100))||
+                        ((enemy.x > 150) && (enemy.x <= 250) && (player.x === 200))||
+                        ((enemy.x > 250) && (enemy.x <= 350) && (player.x === 300))||
+                        ((enemy.x > 350) && (enemy.x <= 450) && (player.x === 400))){
+                        player.x = 200;
+                        player.y = 400;
+                        player.lives--;
+                    }
                 }
             }
         });
+    }
+
+    function checkPoints() {
+        //checking if the enemy and the player are in the same row
+        if (BlueGem.y === player.y){
+            //checking if the enemy and the player are in the same block
+            if (((BlueGem.x > -50) && (BlueGem.x <= 50) && (player.x === 0))||
+                ((BlueGem.x > 50) && (BlueGem.x <= 150) && (player.x === 100))||
+                ((BlueGem.x > 150) && (BlueGem.x <= 250) && (player.x === 200))||
+                ((BlueGem.x > 250) && (BlueGem.x <= 350) && (player.x === 300))||
+                ((BlueGem.x > 350) && (BlueGem.x <= 450) && (player.x === 400))){
+                BlueGem.x = 1000;
+                BlueGem.y = 1000;
+                player.points = player.points + BlueGem.points;
+                console.log(player.points);
+            }
+        }
+    }
+
+    function checkLives() {
+        //checking if the enemy and the player are in the same row
+        if (Heart.y === player.y){
+            //checking if the enemy and the player are in the same block
+            if (((Heart.x > -50) && (Heart.x <= 50) && (player.x === 0))||
+                ((Heart.x > 50) && (Heart.x <= 150) && (player.x === 100))||
+                ((Heart.x > 150) && (Heart.x <= 250) && (player.x === 200))||
+                ((Heart.x > 250) && (Heart.x <= 350) && (player.x === 300))||
+                ((Heart.x > 350) && (Heart.x <= 450) && (player.x === 400))){
+                Heart.x = 1000;
+                Heart.y = 1000;
+                player.lives = player.lives + Heart.lives;
+                console.log(player.lives);
+            }
+        }
+    }
+
+    function checkStar() {
+        //checking if the enemy and the player are in the same row
+        if (star.y === player.y){
+            //checking if the enemy and the player are in the same block
+            if (((star.x > -50) && (star.x <= 50) && (player.x === 0))||
+                ((star.x > 50) && (star.x <= 150) && (player.x === 100))||
+                ((star.x > 150) && (star.x <= 250) && (player.x === 200))||
+                ((star.x > 250) && (star.x <= 350) && (player.x === 300))||
+                ((star.x > 350) && (star.x <= 450) && (player.x === 400))){
+                star.x = 1000;
+                star.y = 1000;
+                player.starred = true;
+            }
+        }
     }
     /* This is called by the update function and loops through all of the
      * objects within the allEnemies array as defined in app.js and calls
@@ -126,6 +184,7 @@ var Engine = (function(global) {
         // Before drawing, clear existing canvas
         ctx.clearRect(0,0,canvas.width,canvas.height)
 
+
         /* Loop through the number of rows and columns we've defined above
          * and, using the rowImages array, draw the correct image for that
          * portion of the "grid"
@@ -142,8 +201,18 @@ var Engine = (function(global) {
                 ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
             }
         }
-
+        ctx.font = "30px Arial";
+        level = "Level: " + player.level;
+        ctx.fillText(level,10,50);
+        lives = "Lives: " + player.lives;
+        ctx.fillText(lives,400,50);
         renderEntities();
+
+        if (player.lives < 0){
+            ctx.drawImage(Resources.get(player.GameOver), 100, 100);
+            setTimeout(reset, 1000);
+            
+        }
     }
 
     /* This function is called by the render function and is called on each game
@@ -154,15 +223,74 @@ var Engine = (function(global) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function.
          */
-        allEnemies.forEach(function(enemy) {
-            enemy.render();
-        });
+         if ((player.level % 10) === 0){
+            player.starred = false;
+            BlueGem.render();
+            Heart.render();
+            star2.render();
+            allEnemies.forEach(function(enemy) {
+                enemy.render();
+            });
 
-        player.render();
+            player.render();
+         }
+         else if ((player.level % 5) === 0){
+            player.starred = false;
+            Heart.render();
+            BlueGem2.render();
+            star.render();
+            allEnemies.forEach(function(enemy) {
+                enemy.render();
+            });
+
+            player.render();
+         }
+         else if ((player.level % 3) === 0){
+            player.starred = false;
+            Heart2.render();
+            BlueGem.render();
+            star.render();
+            allEnemies.forEach(function(enemy) {
+                enemy.render();
+            });
+
+            player.render();
+         }
+         else if((player.level % 2) === 0){
+            player.starred = false;
+            allEnemies.forEach(function(enemy) {
+                enemy.render();
+            });
+            BlueGem2.render();
+            Heart2.render();
+            star2.render();
+            player.render();
+         }
+         else
+         {
+            player.starred = false;
+            BlueGem.render();
+            star2.render();
+            Heart2.render();
+            allEnemies.forEach(function(enemy) {
+                enemy.render();
+            });
+
+            player.render();
+         }
 
         //checking if the player reaches the water (wins)
-        if (player.y < 100)
-            ctx.drawImage(Resources.get(player.winning), 0, 100);
+        if (player.y < 100){
+            // ctx.drawImage(Resources.get(player.winning), 0, 100);
+            setTimeout(function() {
+            player.x = 200;
+            player.y = 400;
+            }, 10);
+
+            player.level++;
+            level = "Level: " + player.level;
+            ctx.fillText(level,10,50);
+        }
     }
 
     /* This function does nothing but it could have been a good place to
@@ -170,7 +298,13 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
+        player.x = 200;
+        player.y = 400;
+        player.points = 0;
+        player.level = 1;
+        player.lives = 3;
+        player.starred = false;
+        player.canMove = false;
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -183,7 +317,12 @@ var Engine = (function(global) {
         'images/grass-block.png',
         'images/enemy-bug.png',
         'images/char-boy.png',
-        'images/winning.png'
+        'images/winning.png',
+        'images/enemy-bug2.png',
+        'images/Gem-Blue.png',
+        'images/Star.png',
+        'images/Heart.png',
+        'images/gameover.png'
     ]);
     Resources.onReady(init);
 
