@@ -60,8 +60,7 @@ var player = function(){
     // a helper we've provided to easily load images
     this.sprite = 'images/char-boy.png';
 
-    //The winning message 
-    this.winning = 'images/winning.png';
+    //The Game Over message 
     this.GameOver = 'images/gameover.png';
 
     //Player's initial location,
@@ -73,7 +72,7 @@ var player = function(){
     this.level = 1;
     this.lives = 3;
     this.starred = false;
-    this.canMove = false;
+
 };
 
 
@@ -165,16 +164,3 @@ var Heart = new Hearts(300, 68);
 var Heart2 = new Hearts(1000, 1000);
 var star = new Star(100, 317);
 var star2 = new Star(1000, 1000);
-
-// This listens for key presses and sends the
-// keys to Player.handleInput() method.
-document.addEventListener('keyup', function(e) {
-    var allowedKeys = {
-        37: 'left',
-        38: 'up',
-        39: 'right',
-        40: 'down'
-    };
-
-    player.handleInput(allowedKeys[e.keyCode]);
-});

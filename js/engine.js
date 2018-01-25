@@ -16,6 +16,8 @@ var Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
+        gamePaused = false,
+        gameUnpaused = false,
         lastTime,
         level,
         lives;
@@ -23,6 +25,47 @@ var Engine = (function(global) {
     canvas.width = 505;
     canvas.height = 606;
     doc.body.appendChild(canvas);
+
+
+    //to Pause or Resume or Restart Game
+    document.addEventListener('keyup', function(e) {
+        // Resume game
+        if ((e.keyCode == 80) && (gamePaused === true)) {
+            gamePaused = false;
+            gameUnpaused = true;
+            win.requestAnimationFrame(main);
+        } else if (e.keyCode == 80) {
+            // Pause game
+            gamePaused = true;
+        }
+        // Pressing Enter/Return key Restarts Game
+        else if (e.keyCode == 13) {
+            if (player.lives < 0) {
+                  reset();
+                  win.requestAnimationFrame(main);
+            }
+            // Reset properties
+            player.lives = 3;
+            player.points = 0;
+            player.level = 1;
+        }
+    });
+
+    // This listens for key presses and sends the
+    // keys to Player.handleInput() method.
+    document.addEventListener('keyup', function(e) {
+        var allowedKeys = {
+            37: 'left',
+            38: 'up',
+            39: 'right',
+            40: 'down'
+        };
+
+        if (gamePaused !== 'true') {
+            player.handleInput(allowedKeys[e.keyCode]);
+        }
+    });
+
 
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
